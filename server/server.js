@@ -3,6 +3,7 @@ import dotenv from "dotenv"
 import cors from "cors"
 import connectDB from "./config.js/db.js";
 import authRoutes from "./routes/authRoutes.js"
+import adminRoutes from "./routes/adminRoutes.js"
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -20,6 +21,7 @@ app.get("/",(req,res)=>{
 })
 
 app.use("/api/auth",authRoutes);
+app.use("/api/admin",adminRoutes);
 
 app.listen(PORT,()=>{
     console.log(`Server is running on PORT ${PORT}`)

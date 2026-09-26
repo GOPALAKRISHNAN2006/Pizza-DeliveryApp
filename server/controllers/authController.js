@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken"
 import crypto from "crypto"
 import sendEmail from "../utils/sendEmail.js"
+
 export const login = async(req,res)=>{
     try{
         const {email,password} = req.body;
