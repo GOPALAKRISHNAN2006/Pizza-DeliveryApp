@@ -23,6 +23,18 @@ const UserSchema = new mongoose.Schema(
             type:Boolean,
             default:false
         },
+        verificationToken:{
+            type:String
+        },
+        verificationTokenExpires:{
+            type:Date
+        },
+        passwordResetToken:{
+            type:String
+        },
+        passwordResetTokenExpires:{
+            type:Date
+        },
         role:{
         type:String,
         enum:["user"],
