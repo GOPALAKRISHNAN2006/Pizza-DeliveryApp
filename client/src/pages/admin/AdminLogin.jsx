@@ -5,8 +5,8 @@ import { useToast } from "../../hooks/useToast";
 import { Shield, Mail, Lock, AlertCircle, ArrowRight, Home } from "lucide-react";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState(import.meta.env.VITE_DEFAULT_ADMIN_EMAIL || "gopalmuruga007@gmail.com");
-  const [password, setPassword] = useState("Pizza@123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 

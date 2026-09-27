@@ -70,8 +70,8 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/admin/login" style={{ color: "#fbbf24", fontWeight: 600 }}>
-                  🛡️ Admin Login
+                <Link to="/register" style={{ color: "#cbd5e1", transition: "color 0.2s" }}>
+                  ✨ Join Oasis Rewards
                 </Link>
               </li>
             </ul>
