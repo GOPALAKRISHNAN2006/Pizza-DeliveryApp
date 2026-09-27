@@ -1,251 +1,330 @@
-import User from "../model/User.js";
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken"
-import crypto from "crypto"
-import sendEmail from "../utils/sendEmail.js"
+import jwt from "jsonwebtoken";
+import User from "../model/User.js";
+import { sendVerificationEmail, sendPasswordResetEmail } from "../services/emailService.js";
 
-export const login = async(req,res)=>{
-    try{
-        const {email,password} = req.body;
-         if(!email || !password){
-            return res.status(400).json({
-                message:"email and password fields are required!"
-            })
-        }
-        const user = await User.findOne({email});
-        if(!user){
-            return res.status(400).json({
-                success:false,
-                message:"User with this email is not exist!Please register."
-            })
-        }
-        const comparePassword = await bcrypt.compare(password,user.password);
-        if(!comparePassword){
-            return res.status(400).json({
-                success:false,
-                message:"Email or Password Incorrect"
-            })
-        }
-        if (!user.isEmailVerified) {
-             return res.status(403).json({
-                message: "Please verify your email before logging in"
-        });
-       }
-        const token = jwt.sign({userId:user._id},process.env.JWT_SECRET,{expiresIn:"1d"});
-        return res.status(200).json({
-            success:true,
-            message:"Login Successfull",
-            token
-        })
-    }catch(error){
-        console.log(error.message);
-        return res.status(500).json({
-            success:false,
-            message:"Failed to Login!"
-        })
+/**
+ * Register a new user
+ * POST /api/auth/register
+ */
+export const register = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide all required fields: name, email, and password."
+      });
     }
-}
 
-export const register = async(req,res)=>{
-    try{
-        const{name,email,password} = req.body;
-        if(!name || !email || !password){
-            return res.status(400).json({
-                message:"name,email and password fields are required!"
-            })
-        }
-        const existingUser = await User.findOne({email});
-        if(existingUser){
-            return res.status(400).json({
-                success:false,
-                message:"User with this email is already exists! try using different email"
-            })
-        }
-        const salt = 10;
-        const hashedPassword = await bcrypt.hash(password,salt);
-        const verificationToken = crypto.randomBytes(32).toString("hex");
-        const verificationTokenExpires = new Date(
-            Date.now()+15*60*1000
-        );
-        const user = await User.create({
-            name,
-            email,
-            password:hashedPassword,
-            isEmailVerified:false,
-            verificationToken,
-            verificationTokenExpires
-        });
-        const apiBaseUrl = (
-            process.env.API_BASE_URL || `http://localhost:${process.env.PORT || 5000}`
-        ).replace(/\/+$/, "");
-        const verificationUrl = `${apiBaseUrl}/api/auth/verify-email/${verificationToken}`;
-
-        try {
-            await sendEmail(
-                email,
-                "Verify Your Pizza Delivery Account",
-                `<h2>Welcome to pizza Delivery!</h2>
-                <p>Hello ${name}</p>
-                <p>Thank you for registering with Pizza Delivery.</p>
-                <p>Please click the button below to verify your email address.</p>
-                <a href="${verificationUrl}"
-                        style="
-                            display:inline-block;
-                            padding:10px 20px;
-                            background:#ff5722;
-                            color:white;
-                            text-decoration:none;
-                            border-radius:5px;
-                        "
-                    > Verify Email</a>
-                    <p>This verification link will expire in 15 minutes.</p>
-                `
-            );
-        } catch (emailError) {
-            console.error("Registration verification email failed:", emailError.message);
-            await User.deleteOne({ _id: user._id, isEmailVerified: false });
-            return res.status(502).json({
-                success: false,
-                message: "Could not send the verification email. Please check the email settings and try again."
-            });
-        }
-
-        return res.status(201).json({
-            success:true,
-            message:"Registeration Successful.Plaese check your email to verify your account",
-        })
-    }catch(error){
-        console.log(error);
-        return res.status(500).json({
-            success:false,
-            message:"Error occur while try to Register"
-        })
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email address."
+      });
     }
-}
 
-export const verifyEmail = async(req,res)=>{
-    try{
-        const {token}=req.params;
-        const user = await User.findOne({
-            verificationToken:token
-        });
-        if(!user){
-            return res.status(400).json({
-                message:"Invalid verification token"
-            })
-        }
-        if(!user.verificationTokenExpires || user.verificationTokenExpires < new Date()){
-            return res.status(400).json({
-                message:"verification token expired"
-            })
-        }
-
-        user.isEmailVerified=true;
-        user.verificationToken=undefined;
-        user.verificationTokenExpires=undefined;
-
-        await user.save();
-        res.status(200).json({
-            message:"Email verified successfully"
-        })
-    }catch(error){
-        console.log("Email verification error:", error.message);
-
-        res.status(500).json({
-            message: "Server error"
-        });
-    }
-}
-
-export const forgotPassword = async(req,res)=>{
-    try{
-        const {email} = req.body;
-        const user = await User.findOne({email});
-        if(!user){
-            return res.status(400).json({
-                message:"If this email exist then reset link must have been sent!"
-            })
-        }
-        const resetToken = crypto.randomBytes(32).toString("hex");
-        const resetTokenExpires = new Date(
-            Date.now()+15*60*1000
-        );
-        user.passwordResetToken = resetToken;
-        user.passwordResetTokenExpires = resetTokenExpires;
-        await user.save();
-        const resetUrl = `http://localhost:5000/reset-password/${resetToken}`
-        await sendEmail(
-                email,
-                "Reset Your Pizza Delivery Account",
-                `<h2>Welcome to pizza Delivery!</h2>
-                <p>Reset Password from Pizza Delivery.</p>
-                <p>Please click the button below to reset your password.</p>
-                <a href="${resetUrl}"
-                        style="
-                            display:inline-block;
-                            padding:10px 20px;
-                            background:#ff5722;
-                            color:white;
-                            text-decoration:none;
-                            border-radius:5px;
-                        "
-                    > Reset Password</a>
-                    <p>This reset link will expire in 15 minutes.</p>
-                `
-        );
-        return res.status(200).json({
-            message:"If this email exst then reset link must have been sent!"
-        })
-    }catch(error){
-        console.log(error);
-        return res.status(500).json({
-            message:"Error while reset password"
-        })
-    }
-}
-
-
-export const resetPassword = async(req,res)=>{
-  try{
-    const {password} = req.body;
-    const {token} = req.params;
-     if (!password) {
-        return res.status(400).json({
-            message: "New password is required"
-        });
-    }
     if (password.length < 6) {
-        return res.status(400).json({
-            message: "Password must be at least 6 characters"
-         });
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters in length."
+      });
     }
 
-        const user = await User.findOne({
-            passwordResetToken:token
-        })
-        if(!user){
-            return res.status(400).json({
-                message:"Invalid or expired reset token"
-            })
-        }
-    if(!user.passwordResetTokenExpires || user.passwordResetTokenExpires < new Date()){
-        return res.status(400).json({
-            message:"reset token has expired"
-        })
+    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "An account with this email address already exists."
+      });
     }
-    const salt=10;
-    const hashedpassword = await bcrypt.hash(password,salt);
-    user.password = hashedpassword;
-    user.passwordResetToken=undefined;
-    user.passwordResetTokenExpires=undefined;
-    await user.save();
-    return res.status(200).json({
-        message:"Password reset successfully"
-    })
-  }catch(error){
-    console.log(error);
-    return res.status(500).json({
-        message:"Error while reset password"
-    })
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    const verificationTokenExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+
+    const user = await User.create({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      password: hashedPassword,
+      isEmailVerified: false,
+      verificationToken,
+      verificationTokenExpires,
+      role: "user"
+    });
+
+    try {
+      await sendVerificationEmail(user, verificationToken);
+    } catch (emailError) {
+      console.warn("⚠️ Verification email send failed:", emailError.message);
+      // In development, if email fails to send, do not crash; provide friendly instruction
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: "Registration successful! Please check your email to verify your account.",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isEmailVerified: user.isEmailVerified,
+        role: user.role
+      },
+      // In dev mode when offline or demoing:
+      verificationTokenPreview: process.env.NODE_ENV !== "production" ? verificationToken : undefined
+    });
+  } catch (error) {
+    next(error);
   }
-}
+};
+
+/**
+ * Verify user email via token
+ * GET /api/auth/verify-email/:token
+ */
+export const verifyEmail = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "Verification token is required."
+      });
+    }
+
+    const user = await User.findOne({
+      verificationToken: token
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid verification token or account already verified."
+      });
+    }
+
+    if (!user.verificationTokenExpires || user.verificationTokenExpires < new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: "Verification token has expired. Please request a new verification link."
+      });
+    }
+
+    user.isEmailVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Email verified successfully! You can now log in to Oasis Pizza."
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * User Login
+ * POST /api/auth/login
+ */
+export const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required."
+      });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password."
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password."
+      });
+    }
+
+    if (!user.isEmailVerified) {
+      return res.status(403).json({
+        success: false,
+        message: "Please verify your email before logging in. Check your inbox for the verification link.",
+        isEmailVerified: false
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        role: user.role || "user"
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful! Welcome back to Oasis Pizza.",
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Forgot password request
+ * POST /api/auth/forgot-password
+ */
+export const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide your registered email address."
+      });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+    // Do not reveal whether user exists for security
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: "If an account with that email exists, a password reset link has been sent."
+      });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.passwordResetToken = resetToken;
+    user.passwordResetTokenExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+    await user.save();
+
+    try {
+      await sendPasswordResetEmail(user, resetToken);
+    } catch (emailErr) {
+      console.warn("⚠️ Password reset email failed:", emailErr.message);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "If an account with that email exists, a password reset link has been sent.",
+      resetTokenPreview: process.env.NODE_ENV !== "production" ? resetToken : undefined
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Reset password
+ * POST /api/auth/reset-password/:token
+ */
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: "New password is required."
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters in length."
+      });
+    }
+
+    const user = await User.findOne({
+      passwordResetToken: token
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired password reset token."
+      });
+    }
+
+    if (!user.passwordResetTokenExpires || user.passwordResetTokenExpires < new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: "Password reset token has expired. Please request a new one."
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    user.passwordResetToken = undefined;
+    user.passwordResetTokenExpires = undefined;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successful! You can now log in with your new password."
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get current authenticated user
+ * GET /api/auth/me
+ */
+export const getMe = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found."
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default {
+  register,
+  verifyEmail,
+  login,
+  forgotPassword,
+  resetPassword,
+  getMe
+};
