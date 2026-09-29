@@ -1,6 +1,23 @@
 import React from "react";
 import { Check, AlertTriangle, XCircle } from "lucide-react";
 import { formatCurrency } from "../utils/formatters";
+import OptimizedImage from "./OptimizedImage";
+
+const getCategoryEmoji = (category) => {
+  switch (category) {
+    case "base":
+      return "🌾";
+    case "sauce":
+      return "🍅";
+    case "cheese":
+      return "🧀";
+    case "veggies":
+    case "vegetables":
+      return "🥗";
+    default:
+      return "🍕";
+  }
+};
 
 const IngredientCard = ({
   item,
@@ -10,6 +27,7 @@ const IngredientCard = ({
 }) => {
   const isOutOfStock = !item.quantity || item.quantity <= 0;
   const isLowStock = item.quantity > 0 && item.quantity <= (item.lowStockThreshold || 10);
+  const emoji = getCategoryEmoji(item.category);
 
   return (
     <div
@@ -48,41 +66,26 @@ const IngredientCard = ({
           alignItems: "center",
           justifyContent: "center",
           boxShadow: isSelected ? "0 0 10px rgba(225, 29, 72, 0.5)" : "none",
-          transition: "all 0.15s"
+          transition: "all 0.15s",
+          zIndex: 2
         }}
       >
         {isSelected && <Check size={15} color="#ffffff" strokeWidth={3} />}
       </div>
 
-      {/* Item Image */}
-      {item.imageUrl ? (
-        <div style={{ width: "100%", height: "120px", borderRadius: "10px", overflow: "hidden", position: "relative", background: "rgba(0,0,0,0.3)" }}>
-          <img
-            src={item.imageUrl}
-            alt={item.name}
-            style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s ease" }}
-            className="hover:scale-105"
-            onError={(e) => {
-              e.target.style.display = "none";
-            }}
-          />
-        </div>
-      ) : (
-        <div
-          style={{
-            width: "100%",
-            height: "90px",
-            borderRadius: "10px",
-            background: "rgba(255, 255, 255, 0.03)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "2rem"
-          }}
-        >
-          {item.category === "base" ? "🌾" : item.category === "sauce" ? "🍅" : item.category === "cheese" ? "🧀" : "🥗"}
-        </div>
-      )}
+      {/* Item Image with WebP & Lazy Loading */}
+      <div style={{ width: "100%", height: "120px", borderRadius: "10px", overflow: "hidden", position: "relative" }}>
+        <OptimizedImage
+          src={item.imageUrl}
+          alt={item.name}
+          width={400}
+          height={120}
+          fallbackEmoji={emoji}
+          fallbackText={item.category}
+          style={{ width: "100%", height: "120px", objectFit: "cover" }}
+          containerStyle={{ width: "100%", height: "120px", borderRadius: "10px" }}
+        />
+      </div>
 
       {/* Item Details */}
       <div>

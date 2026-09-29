@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { getPresetPizzas } from "../services/pizzaService";
 import { formatCurrency } from "../utils/formatters";
+import OptimizedImage from "../components/OptimizedImage";
+import { preloadRoute } from "../routes/AppRoutes";
 import {
   Sparkles,
   Flame,
@@ -112,6 +114,7 @@ const Home = () => {
               <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center" }}>
                 <Link
                   to="/pizza-builder"
+                  onMouseEnter={() => preloadRoute.pizzaBuilder()}
                   className="btn-primary"
                   style={{ padding: "0.9rem 2rem", fontSize: "1.05rem" }}
                 >
@@ -193,10 +196,14 @@ const Home = () => {
                   }}
                 >
                   <div style={{ height: "300px", borderRadius: "14px", overflow: "hidden", position: "relative" }}>
-                    <img
+                    <OptimizedImage
                       src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop&q=80"
                       alt="Artisanal Pizza"
+                      width={800}
+                      height={300}
+                      priority={true}
                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      containerStyle={{ width: "100%", height: "300px", borderRadius: "14px" }}
                     />
                     <div
                       style={{
@@ -212,7 +219,8 @@ const Home = () => {
                         color: "#fbbf24",
                         display: "flex",
                         alignItems: "center",
-                        gap: "6px"
+                        gap: "6px",
+                        zIndex: 2
                       }}
                     >
                       <Award size={14} />
@@ -229,7 +237,12 @@ const Home = () => {
                       Thin Italian crust, rich San Marzano marinara, creamy fresh mozzarella, mushrooms, olives & fresh basil.
                     </p>
 
-                    <Link to="/pizza-builder" className="btn-primary" style={{ width: "100%" }}>
+                    <Link
+                      to="/pizza-builder"
+                      onMouseEnter={() => preloadRoute.pizzaBuilder()}
+                      className="btn-primary"
+                      style={{ width: "100%" }}
+                    >
                       Customize Yours Now
                     </Link>
                   </div>
@@ -308,10 +321,13 @@ const Home = () => {
                 }}
               >
                 <div style={{ height: "190px", position: "relative", overflow: "hidden" }}>
-                  <img
+                  <OptimizedImage
                     src={preset.imageUrl}
                     alt={preset.name}
+                    width={500}
+                    height={190}
                     style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s ease" }}
+                    containerStyle={{ width: "100%", height: "190px" }}
                   />
                   {preset.badge && (
                     <span
@@ -326,7 +342,8 @@ const Home = () => {
                         fontWeight: 700,
                         padding: "4px 10px",
                         borderRadius: "99px",
-                        border: "1px solid rgba(251, 191, 36, 0.3)"
+                        border: "1px solid rgba(251, 191, 36, 0.3)",
+                        zIndex: 2
                       }}
                     >
                       {preset.badge}
@@ -367,6 +384,7 @@ const Home = () => {
                   <div style={{ marginTop: "auto" }}>
                     <button
                       onClick={() => handleCustomizePreset(preset)}
+                      onMouseEnter={() => preloadRoute.pizzaBuilder()}
                       className="btn-primary"
                       style={{ width: "100%", padding: "0.75rem" }}
                     >

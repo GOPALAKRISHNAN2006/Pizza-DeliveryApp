@@ -4,16 +4,22 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍕</text></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#060911" />
     <title>Oasis Pizza | Handcrafted Artisanal Pizza & Real-time Delivery</title>
     <meta name="description" content="Build your custom gourmet pizza with fresh ingredients, live inventory tracking, test Razorpay checkout, and real-time order tracking." />
-    
+
+    <!-- Performance: DNS Prefetch & Preconnect for external assets -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+    <link rel="dns-prefetch" href="https://checkout.razorpay.com" />
+
     <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     
-    <!-- Razorpay Checkout Script -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <!-- Razorpay Checkout Script (deferred for non-blocking page load) -->
+    <script defer src="https://checkout.razorpay.com/v1/checkout.js"></script>
   </head>
   <body>
     <div id="root"></div>

@@ -929,3 +929,35 @@ button, input, select, textarea {
   gap: 10px;
   animation: slideInRight 0.25s ease;
 }
+
+/* ==========================================================================
+   Skeleton Shimmer & Image Optimization Styles
+   ========================================================================== */
+.skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite ease-in-out;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.optimized-image-wrapper {
+  content-visibility: auto;
+  contain-intrinsic-size: 120px;
+}
+
+.image-fallback-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+}
+

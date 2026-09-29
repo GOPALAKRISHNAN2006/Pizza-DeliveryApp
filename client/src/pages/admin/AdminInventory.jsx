@@ -9,6 +9,7 @@ import {
 import { useToast } from "../../hooks/useToast";
 import { formatCurrency } from "../../utils/formatters";
 import { TableRowSkeleton } from "../../components/SkeletonLoader";
+import OptimizedImage from "../../components/OptimizedImage";
 import {
   Boxes,
   Plus,
@@ -306,18 +307,17 @@ const AdminInventory = () => {
                   <tr key={item._id} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                     <td style={{ padding: "12px 16px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        {item.imageUrl ? (
-                          <img
+                        <div style={{ width: "36px", height: "36px", flexShrink: 0 }}>
+                          <OptimizedImage
                             src={item.imageUrl}
                             alt={item.name}
+                            width={36}
+                            height={36}
+                            fallbackEmoji={item.category === "base" ? "🌾" : item.category === "sauce" ? "🍅" : item.category === "cheese" ? "🧀" : "🥗"}
+                            containerStyle={{ width: "36px", height: "36px", borderRadius: "8px" }}
                             style={{ width: "36px", height: "36px", borderRadius: "8px", objectFit: "cover" }}
-                            onError={(e) => (e.target.style.display = "none")}
                           />
-                        ) : (
-                          <div style={{ width: "36px", height: "36px", borderRadius: "8px", background: "rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <Boxes size={18} color="#64748b" />
-                          </div>
-                        )}
+                        </div>
                         <div>
                           <div style={{ fontWeight: 700, color: "#fff" }}>{item.name}</div>
                           {item.description && (

@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../hooks/useCart";
 import { useSocket } from "../hooks/useSocket";
+import { preloadRoute } from "../routes/AppRoutes";
 import {
   Pizza,
   ShoppingBag,
@@ -79,6 +80,7 @@ const Navbar = () => {
           </Link>
           <Link
             to="/pizza-builder"
+            onMouseEnter={() => preloadRoute.pizzaBuilder()}
             style={{
               fontSize: "0.95rem",
               fontWeight: 600,
@@ -96,6 +98,7 @@ const Navbar = () => {
             <>
               <Link
                 to="/orders"
+                onMouseEnter={() => preloadRoute.orders()}
                 style={{
                   fontSize: "0.95rem",
                   fontWeight: 600,
@@ -111,6 +114,7 @@ const Navbar = () => {
               </Link>
               <Link
                 to="/dashboard"
+                onMouseEnter={() => preloadRoute.dashboard()}
                 style={{
                   fontSize: "0.95rem",
                   fontWeight: 600,
@@ -125,6 +129,7 @@ const Navbar = () => {
           {isAdminAuthenticated && (
             <Link
               to="/admin/dashboard"
+              onMouseEnter={() => preloadRoute.adminDashboard()}
               style={{
                 fontSize: "0.9rem",
                 fontWeight: 700,

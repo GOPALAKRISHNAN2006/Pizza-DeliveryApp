@@ -2,6 +2,7 @@ import express from "express";
 import http from "http";
 import dotenv from "dotenv";
 import cors from "cors";
+import compression from "compression";
 import connectDB from "./config/db.js";
 import { initSocket } from "./sockets/socketHandler.js";
 import { initLowStockCron } from "./jobs/lowStockJob.js";
@@ -16,10 +17,27 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
+// Enable strong ETags for HTTP 304 conditional request validation
+app.set("etag", "strong");
+
+// HTTP Compression (gzip / deflate / brotli) for ultra-fast payload delivery
+app.use(
+  compression({
+    level: 6,
+    threshold: 1024, // Compress responses above 1KB
+    filter: (req, res) => {
+      if (req.headers["x-no-compression"]) {
+        return false;
+      }
+      return compression.filter(req, res);
+    }
+  })
+);
+
 // Initialize Socket.IO
 const io = initSocket(server);
 
-// Middleware
+// Standard Body Parser & CORS
 app.use(express.json());
 app.use(
   cors({
@@ -70,6 +88,7 @@ server.listen(PORT, () => {
   console.log(`🍕 Oasis Pizza Backend running on port ${PORT}`);
   console.log(`🌐 API Base URL: http://localhost:${PORT}`);
   console.log(`📡 WebSockets Active with Socket.IO`);
+  console.log(`⚡ Gzip/Deflate Compression & Caching Enabled`);
   console.log("==========================================");
 });
 
