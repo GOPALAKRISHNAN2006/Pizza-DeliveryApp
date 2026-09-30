@@ -70,7 +70,7 @@ export const ToastProvider = ({ children }) => {
   );
 };
 
-export const useToast = () => {
+export const useToastContext = () => {
   const context = useContext(ToastContext);
   if (!context) {
     throw new Error("useToast must be used within a ToastProvider");
@@ -78,4 +78,5 @@ export const useToast = () => {
   return context;
 };
 
+export const useToast = useToastContext;
 export default ToastContext;

@@ -2,7 +2,7 @@ import React from "react";
 import { CheckCircle2, Clock, Flame, Bike, AlertOctagon } from "lucide-react";
 import { ORDER_STEPS, getOrderStatusStepIndex } from "../utils/formatters";
 
-const OrderTracker = ({ orderStatus, updatedAt }) => {
+const OrderTracker = ({ orderStatus }) => {
   const isCancelled = orderStatus === "Cancelled";
   const currentStepIdx = getOrderStatusStepIndex(orderStatus);
 

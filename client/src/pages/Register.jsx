@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/useToast";
 import {
@@ -34,7 +34,6 @@ const Register = () => {
 
   const { register } = useAuth();
   const toast = useToast();
-  const navigate = useNavigate();
 
   // Password strength calculation
   const strength = useMemo(() => {

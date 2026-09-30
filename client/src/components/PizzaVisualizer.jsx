@@ -1,5 +1,4 @@
 import React from "react";
-import { Sparkles } from "lucide-react";
 
 /**
  * Visual Interactive Artisanal Pizza Canvas that dynamically layers

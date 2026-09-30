@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
   getAdminInventory,
   addAdminInventory,
@@ -11,22 +11,16 @@ import { formatCurrency } from "../../utils/formatters";
 import { TableRowSkeleton } from "../../components/SkeletonLoader";
 import OptimizedImage from "../../components/OptimizedImage";
 import {
-  Boxes,
   Plus,
   Search,
   Edit2,
   Trash2,
-  AlertTriangle,
-  XCircle,
-  CheckCircle2,
   X,
-  RefreshCw,
-  Image as ImageIcon
+  RefreshCw
 } from "lucide-react";
 
 const AdminInventory = () => {
   const [inventory, setInventory] = useState([]);
-  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,13 +43,12 @@ const AdminInventory = () => {
 
   const toast = useToast();
 
-  const fetchInventory = async () => {
+  const fetchInventory = useCallback(async () => {
     try {
       setLoading(true);
       const res = await getAdminInventory();
       if (res.success) {
         setInventory(res.inventory || []);
-        setFiltered(res.inventory || []);
       }
     } catch (err) {
       console.error("Inventory fetch failed:", err);
@@ -63,14 +56,14 @@ const AdminInventory = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchInventory();
-  }, []);
+  }, [fetchInventory]);
 
-  // Filter & Search effect
-  useEffect(() => {
+  // Compute filtered items derived from state
+  const filtered = useMemo(() => {
     let result = [...inventory];
 
     if (categoryFilter !== "All") {
@@ -81,7 +74,7 @@ const AdminInventory = () => {
       result = result.filter((i) => i.name.toLowerCase().includes(searchQuery.toLowerCase()));
     }
 
-    setFiltered(result);
+    return result;
   }, [categoryFilter, searchQuery, inventory]);
 
   const handleFormChange = (e) => {

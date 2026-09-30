@@ -114,24 +114,42 @@ LOW_STOCK_CRON_SCHEDULE=*/5 * * * *
 
 ### 1. Prerequisites
 - **Node.js** (v18 or higher recommended)
-- **MongoDB** running locally on port `27017` or MongoDB Atlas URI
+- **MongoDB** running locally on port `27017` or a MongoDB Atlas URI
 
-### 2. Backend Setup
+---
+
+### Quick Start (One Command from Root)
+```bash
+# 1. Install all dependencies across client and server
+npm run install:all
+
+# 2. Seed ingredients & create admin account in MongoDB
+npm run setup
+
+# 3. Start both Backend & Frontend simultaneously
+npm run dev
+```
+
+---
+
+### Alternative: Individual Service Setup
+
+#### Backend Setup (`/server`)
 ```bash
 cd server
 npm install
 
 # Seed Initial Pizza Ingredients (Crusts, Sauces, Cheeses, Vegetables)
-node scripts/seedInventory.js
+npm run seed
 
 # Create the Administrator Account
-node scripts/createAdmin.js
+npm run create-admin
 
 # Start Backend Dev Server
 npm run dev
 ```
 
-### 3. Frontend Setup
+#### Frontend Setup (`/client`)
 ```bash
 cd ../client
 npm install
@@ -141,6 +159,15 @@ npm run dev
 ```
 
 Open your browser at `http://localhost:5173`.
+
+---
+
+### 🧪 Automated End-to-End Test Suite
+Run the comprehensive 12-step automated integration test suite covering registration, email verification, login, pizza building, stock validation, test Razorpay payment, atomic stock deduction, admin metrics, and real-time status transitions:
+
+```bash
+npm test
+```
 
 ---
 

@@ -12,13 +12,12 @@ import {
   Shield,
   Menu,
   X,
-  Compass,
   Layers,
   Clock
 } from "lucide-react";
 
 const Navbar = () => {
-  const { user, isAuthenticated, logoutUser, admin, isAdminAuthenticated } = useAuth();
+  const { user, isAuthenticated, logoutUser, isAdminAuthenticated } = useAuth();
   const { cartItems } = useCart();
   const { isConnected } = useSocket();
   const navigate = useNavigate();

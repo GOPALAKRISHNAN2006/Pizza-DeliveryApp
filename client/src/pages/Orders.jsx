@@ -1,36 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { getMyOrders } from "../services/orderService";
 import { useSocket } from "../hooks/useSocket";
 import { formatCurrency, formatDate, getOrderStatusBadge } from "../utils/formatters";
 import { TableRowSkeleton } from "../components/SkeletonLoader";
-import { Clock, Search, ArrowRight, Pizza, Layers, Filter } from "lucide-react";
+import { Clock, Search, ArrowRight, Layers } from "lucide-react";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
-  const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const { latestOrderStatusEvent } = useSocket();
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       const data = await getMyOrders();
       if (data.orders) {
         setOrders(data.orders);
-        setFilteredOrders(data.orders);
       }
     } catch (err) {
       console.error("Failed to load orders:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [fetchOrders]);
 
   // Update order when socket event arrives
   useEffect(() => {
@@ -45,8 +43,8 @@ const Orders = () => {
     }
   }, [latestOrderStatusEvent]);
 
-  // Filter effect
-  useEffect(() => {
+  // Filter calculation derived via useMemo
+  const filteredOrders = useMemo(() => {
     let result = [...orders];
 
     if (statusFilter !== "All") {
@@ -62,7 +60,7 @@ const Orders = () => {
       );
     }
 
-    setFilteredOrders(result);
+    return result;
   }, [statusFilter, searchQuery, orders]);
 
   return (

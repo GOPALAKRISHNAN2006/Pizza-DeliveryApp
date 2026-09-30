@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { forgotUserPassword } from "../services/authService";
 import { useToast } from "../hooks/useToast";
-import { KeyRound, Mail, ArrowLeft, CheckCircle2, AlertCircle, ArrowRight, ShieldCheck, Flame } from "lucide-react";
+import { KeyRound, Mail, ArrowLeft, CheckCircle2, AlertCircle, ArrowRight } from "lucide-react";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");

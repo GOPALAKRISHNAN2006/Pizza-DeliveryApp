@@ -1,25 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { getAdminOrders, updateAdminOrderStatus } from "../../services/adminService";
 import { useSocket } from "../../hooks/useSocket";
 import { useToast } from "../../hooks/useToast";
-import { formatCurrency, formatDate, getOrderStatusBadge } from "../../utils/formatters";
+import { formatCurrency, formatDate } from "../../utils/formatters";
 import { TableRowSkeleton } from "../../components/SkeletonLoader";
 import {
-  ShoppingBag,
   Search,
-  Filter,
   RefreshCw,
-  Clock,
-  ArrowRight,
-  Pizza,
-  CheckCircle2,
   Eye
 } from "lucide-react";
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
-  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,13 +20,12 @@ const AdminOrders = () => {
   const { latestAdminOrderEvent } = useSocket();
   const toast = useToast();
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
       const res = await getAdminOrders();
       if (res.success) {
         setOrders(res.orders || []);
-        setFiltered(res.orders || []);
       }
     } catch (err) {
       console.error("Admin orders fetch failed:", err);
@@ -41,21 +33,21 @@ const AdminOrders = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [fetchOrders]);
 
   // Update on socket event
   useEffect(() => {
     if (latestAdminOrderEvent) {
       fetchOrders();
     }
-  }, [latestAdminOrderEvent]);
+  }, [latestAdminOrderEvent, fetchOrders]);
 
-  // Filter effect
-  useEffect(() => {
+  // Filter calculation derived directly via useMemo
+  const filtered = useMemo(() => {
     let result = [...orders];
 
     if (statusFilter !== "All") {
@@ -74,7 +66,7 @@ const AdminOrders = () => {
       );
     }
 
-    setFiltered(result);
+    return result;
   }, [statusFilter, searchQuery, orders]);
 
   const handleStatusChange = async (orderId, newStatus) => {

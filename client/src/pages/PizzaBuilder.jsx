@@ -12,7 +12,6 @@ import {
   ChevronRight,
   ChevronLeft,
   ShoppingBag,
-  Sparkles,
   Info,
   RotateCcw,
   CheckCircle2
@@ -44,12 +43,13 @@ const PizzaBuilder = () => {
   const toast = useToast();
   const navigate = useNavigate();
 
-  // Fetch available MongoDB inventory ingredients
+  // Fetch available MongoDB inventory ingredients on mount
   useEffect(() => {
+    let isMounted = true;
     const fetchIngredients = async () => {
       try {
         const data = await getPizzaOptions();
-        if (data.success) {
+        if (data.success && isMounted) {
           setOptions({
             bases: data.bases || [],
             sauces: data.sauces || [],
@@ -58,25 +58,29 @@ const PizzaBuilder = () => {
           });
 
           // If no base selected yet, auto-select first available base
-          if (!currentPizza.base && data.bases.length > 0) {
+          if (!currentPizza?.base && data.bases?.length > 0) {
             setBase(data.bases[0]);
           }
-          if (!currentPizza.sauce && data.sauces.length > 0) {
+          if (!currentPizza?.sauce && data.sauces?.length > 0) {
             setSauce(data.sauces[0]);
           }
-          if (!currentPizza.cheese && data.cheeses.length > 0) {
+          if (!currentPizza?.cheese && data.cheeses?.length > 0) {
             setCheese(data.cheeses[0]);
           }
         }
       } catch (err) {
         console.error("Failed to load ingredients:", err);
-        toast.error("Failed to load inventory ingredients from database");
+        if (isMounted) toast.error("Failed to load inventory ingredients from database");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchIngredients();
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleNext = () => {

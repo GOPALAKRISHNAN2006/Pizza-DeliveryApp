@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { resetUserPassword } from "../services/authService";
 import { useToast } from "../hooks/useToast";
-import { Lock, CheckCircle2, AlertCircle, ArrowRight, Eye, EyeOff, Check, X, ShieldCheck } from "lucide-react";
+import { Lock, CheckCircle2, AlertCircle, ArrowRight, Eye, EyeOff, Check, X } from "lucide-react";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -15,7 +15,6 @@ const ResetPassword = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   const toast = useToast();
-  const navigate = useNavigate();
 
   // Password strength calculation
   const strength = useMemo(() => {

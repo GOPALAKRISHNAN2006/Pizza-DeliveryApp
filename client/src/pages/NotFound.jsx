@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Pizza, Home, ArrowLeft } from "lucide-react";
+import { Pizza, Home } from "lucide-react";
 
 const NotFound = () => {
   return (

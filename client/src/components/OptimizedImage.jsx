@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 /**
  * Helper to get optimized URL for Unsplash or local images
  */
-export const getOptimizedImageUrl = (url, { width, quality = 75, format = "webp" } = {}) => {
+export const getOptimizedImageUrl = (url, { width, quality = 75 } = {}) => {
   if (!url || typeof url !== "string") return "";
 
   // If local ingredient image ending in .jpg, try webp preferentially
@@ -53,8 +53,8 @@ const OptimizedImage = ({
   onError: customOnError
 }) => {
   const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState(false);
-  const [currentSrc, setCurrentSrc] = useState("");
+  const [error, setError] = useState(!src);
+  const [currentSrc, setCurrentSrc] = useState(() => (src ? getOptimizedImageUrl(src, { width }) : ""));
   const imgRef = useRef(null);
 
   useEffect(() => {

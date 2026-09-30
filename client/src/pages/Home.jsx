@@ -4,18 +4,16 @@ import { useCart } from "../hooks/useCart";
 import { getPresetPizzas } from "../services/pizzaService";
 import { formatCurrency } from "../utils/formatters";
 import OptimizedImage from "../components/OptimizedImage";
+import { CardSkeleton } from "../components/SkeletonLoader";
 import { preloadRoute } from "../routes/AppRoutes";
 import {
   Sparkles,
   Flame,
   Clock,
-  ShieldCheck,
-  ChevronRight,
   ArrowRight,
   Star,
   Award,
-  Layers,
-  CheckCircle2
+  Layers
 } from "lucide-react";
 
 const Home = () => {
@@ -309,7 +307,10 @@ const Home = () => {
               gap: "2rem"
             }}
           >
-            {presets.map((preset) => (
+            {loading ? (
+              <CardSkeleton count={3} />
+            ) : (
+              presets.map((preset) => (
               <div
                 key={preset.id}
                 className="glass-card"
@@ -393,7 +394,7 @@ const Home = () => {
                   </div>
                 </div>
               </div>
-            ))}
+            )))}
           </div>
         </div>
       </section>

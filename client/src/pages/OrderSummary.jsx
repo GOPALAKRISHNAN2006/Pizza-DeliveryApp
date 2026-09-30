@@ -10,16 +10,12 @@ import {
   ShoppingBag,
   Trash2,
   Plus,
-  Minus,
   MapPin,
-  Phone,
-  User,
   CreditCard,
   ShieldCheck,
   ArrowRight,
   Pizza,
   Layers,
-  Sparkles,
   Loader2
 } from "lucide-react";
 
@@ -166,7 +162,7 @@ const OrderSummary = () => {
             spread: 70,
             origin: { y: 0.6 }
           });
-        } catch (e) {}
+        } catch (_e) {}
 
         toast.success("Payment verified! Order placed into kitchen! 🍕");
         clearCart();

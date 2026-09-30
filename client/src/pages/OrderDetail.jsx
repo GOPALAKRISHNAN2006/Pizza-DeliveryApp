@@ -1,20 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getOrderById } from "../services/orderService";
 import { useSocket } from "../hooks/useSocket";
 import { useToast } from "../hooks/useToast";
 import OrderTracker from "../components/OrderTracker";
 import { Skeleton } from "../components/SkeletonLoader";
-import { formatCurrency, formatDate, getOrderStatusBadge } from "../utils/formatters";
+import { formatCurrency, formatDate } from "../utils/formatters";
 import {
   ArrowLeft,
   Pizza,
   MapPin,
   CreditCard,
   CheckCircle2,
-  Clock,
   Phone,
-  ShieldCheck,
   RotateCcw
 } from "lucide-react";
 
@@ -26,7 +24,7 @@ const OrderDetail = () => {
   const { joinOrderRoom, leaveOrderRoom, latestOrderStatusEvent } = useSocket();
   const toast = useToast();
 
-  const fetchOrderDetails = async () => {
+  const fetchOrderDetails = useCallback(async () => {
     try {
       const data = await getOrderById(id);
       if (data.order) {
@@ -38,7 +36,7 @@ const OrderDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, toast]);
 
   useEffect(() => {
     fetchOrderDetails();
@@ -47,7 +45,7 @@ const OrderDetail = () => {
     return () => {
       leaveOrderRoom(id);
     };
-  }, [id]);
+  }, [id, fetchOrderDetails, joinOrderRoom, leaveOrderRoom]);
 
   // Handle live socket update
   useEffect(() => {
@@ -64,7 +62,7 @@ const OrderDetail = () => {
       );
       toast.success(`Order status updated to: "${latestOrderStatusEvent.orderStatus}"`);
     }
-  }, [latestOrderStatusEvent, id]);
+  }, [latestOrderStatusEvent, id, toast]);
 
   if (loading) {
     return (

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getAdminOrderById, updateAdminOrderStatus } from "../../services/adminService";
 import { useSocket } from "../../hooks/useSocket";
 import { useToast } from "../../hooks/useToast";
 import OrderTracker from "../../components/OrderTracker";
 import { Skeleton } from "../../components/SkeletonLoader";
-import { formatCurrency, formatDate, getOrderStatusBadge } from "../../utils/formatters";
+import { formatCurrency, formatDate } from "../../utils/formatters";
 import {
   ArrowLeft,
   Pizza,
@@ -13,9 +13,7 @@ import {
   CreditCard,
   User,
   Phone,
-  Mail,
-  ShieldCheck,
-  CheckCircle2
+  Mail
 } from "lucide-react";
 
 const AdminOrderDetail = () => {
@@ -26,7 +24,7 @@ const AdminOrderDetail = () => {
   const { joinOrderRoom, leaveOrderRoom, latestAdminOrderEvent } = useSocket();
   const toast = useToast();
 
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
     try {
       const res = await getAdminOrderById(id);
       if (res.success) {
@@ -38,7 +36,7 @@ const AdminOrderDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, toast]);
 
   useEffect(() => {
     fetchOrder();
@@ -47,13 +45,13 @@ const AdminOrderDetail = () => {
     return () => {
       leaveOrderRoom(id);
     };
-  }, [id]);
+  }, [id, fetchOrder, joinOrderRoom, leaveOrderRoom]);
 
   useEffect(() => {
     if (latestAdminOrderEvent && latestAdminOrderEvent.orderId === id) {
       fetchOrder();
     }
-  }, [latestAdminOrderEvent, id]);
+  }, [latestAdminOrderEvent, id, fetchOrder]);
 
   const handleStatusChange = async (newStatus) => {
     try {

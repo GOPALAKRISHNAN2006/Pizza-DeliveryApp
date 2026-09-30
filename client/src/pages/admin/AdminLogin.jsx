@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useToast } from "../../hooks/useToast";
-import { Shield, Mail, Lock, AlertCircle, ArrowRight, Home, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { Shield, Mail, Lock, AlertCircle, ArrowRight, Home, Eye, EyeOff } from "lucide-react";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");

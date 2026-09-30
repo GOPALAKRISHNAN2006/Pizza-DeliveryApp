@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { getAdminDashboard, updateAdminOrderStatus } from "../../services/adminService";
 import { useSocket } from "../../hooks/useSocket";
 import { useToast } from "../../hooks/useToast";
-import { formatCurrency, formatDate, getOrderStatusBadge } from "../../utils/formatters";
-import { CardSkeleton, TableRowSkeleton } from "../../components/SkeletonLoader";
+import { formatCurrency } from "../../utils/formatters";
+import { TableRowSkeleton } from "../../components/SkeletonLoader";
 import {
   ShoppingBag,
-  IndianRupee,
   Boxes,
   AlertTriangle,
-  Clock,
-  CheckCircle2,
   TrendingUp,
   ArrowRight,
   RefreshCw,
@@ -24,7 +21,7 @@ const AdminDashboard = () => {
   const { latestAdminOrderEvent } = useSocket();
   const toast = useToast();
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       const res = await getAdminDashboard();
       if (res.success) {
@@ -36,18 +33,18 @@ const AdminDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [fetchDashboardData]);
 
   // Update dashboard data on live socket event
   useEffect(() => {
     if (latestAdminOrderEvent) {
       fetchDashboardData();
     }
-  }, [latestAdminOrderEvent]);
+  }, [latestAdminOrderEvent, fetchDashboardData]);
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
